@@ -52,11 +52,14 @@
     }
 
     .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      position: relative;
-    }
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+        height: 160px; /* space for NO to move */
+        }
+
 
     button {
       font-size: 1.2rem;
@@ -76,8 +79,9 @@
       background-color: #555;
       color: white;
       position: absolute;
-      right: 220px;
+      top: 70px;
       pointer-events: none;
+      transition: transform 0.15s ease-out;
     }
 
     /* Result screen */
@@ -141,42 +145,52 @@
 
   <script>
   const noBtn = document.getElementById("no");
+  const buttons = document.querySelector(".buttons");
 
-  const dangerRadius = 90; // px
-  const escapeDistance = 120;
+  const dangerRadius = 80;
+  const escapeStep = 40;
 
-let offsetX = 0;
-let offsetY = 0;
+  let offsetX = 0;
+  let offsetY = 0;
 
-function repel(x, y) {
-  const rect = noBtn.getBoundingClientRect();
-  const btnX = rect.left + rect.width / 2;
-  const btnY = rect.top + rect.height / 2;
+  function repel(x, y) {
+    const btnRect = noBtn.getBoundingClientRect();
+    const yesRect = document.getElementById("yes").getBoundingClientRect();
 
-  const dx = btnX - x;
-  const dy = btnY - y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
+    const btnX = btnRect.left + btnRect.width / 2;
+    const btnY = btnRect.top + btnRect.height / 2;
 
-  if (distance < dangerRadius) {
-    const angle = Math.atan2(dy, dx);
-    offsetX += Math.cos(angle) * 40;
-    offsetY += Math.sin(angle) * 40;
+    const dx = btnX - x;
+    const dy = btnY - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    if (distance < dangerRadius) {
+      const angle = Math.atan2(dy, dx);
+
+      offsetX += Math.cos(angle) * escapeStep;
+      offsetY += Math.sin(angle) * escapeStep;
+
+      // Keep NO inside buttons container
+      const maxX = buttons.clientWidth / 2 - btnRect.width / 2;
+      const maxY = buttons.clientHeight - btnRect.height;
+
+      offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
+      offsetY = Math.max(0, Math.min(maxY, offsetY));
+
+      noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    }
   }
-}
-
-
-  document.addEventListener("mousemove", (e) => {
-    repel(e.clientX, e.clientY);
-  });
 
   document.addEventListener("touchmove", (e) => {
     const touch = e.touches[0];
     if (touch) repel(touch.clientX, touch.clientY);
   });
 
+  document.addEventListener("mousemove", (e) => {
+    repel(e.clientX, e.clientY);
+  });
 </script>
+
 
 <script>
   const yesBtn = document.getElementById("yes");
@@ -202,4 +216,3 @@ function repel(x, y) {
 
 </body>
 </html>
-
