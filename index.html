@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine 💘</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(180deg, #ffb6c1, #ffc0cb);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Floating hearts */
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      animation: floatUp linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(100vh);
+      }
+      to {
+        transform: translateY(-10vh);
+      }
+    }
+
+    .container {
+      text-align: center;
+      z-index: 2;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #b30059;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      position: relative;
+    }
+
+    button {
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #yes {
+      background-color: #ff1493;
+      color: white;
+    }
+
+    #no {
+      background-color: #555;
+      color: white;
+      position: absolute;
+      left: 120px;
+      pointer-events: none;
+    }
+
+    /* Result screen */
+    .result {
+      display: none;
+      text-align: center;
+    }
+
+    .result h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ff0066;
+    }
+
+    .graffiti {
+      position: absolute;
+      font-size: 2rem;
+      animation: pop 1s infinite alternate;
+    }
+
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.2); }
+    }
+
+    img {
+      width: 80%;
+      max-width: 300px;
+      margin-top: 20px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating hearts generator -->
+  <script>
+    for (let i = 0; i < 30; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.innerText = "💖";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = 4 + Math.random() * 6 + "s";
+      heart.style.fontSize = 16 + Math.random() * 24 + "px";
+      document.body.appendChild(heart);
+    }
+  </script>
+
+  <div class="container" id="main">
+    <h1>Pau, will you be my valentine?</h1>
+    <div class="buttons">
+      <button id="yes">YES 💘</button>
+      <button id="no">NO 😏</button>
+    </div>
+  </div>
+
+  <div class="container result" id="result">
+    <h2>I knew you love me 😎🔥</h2>
+    <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Dancing" />
+  </div>
+
+  <script>
+  const noBtn = document.getElementById("no");
+
+  const dangerRadius = 90; // px
+  const escapeDistance = 120;
+
+let offsetX = 0;
+let offsetY = 0;
+
+function repel(x, y) {
+  const rect = noBtn.getBoundingClientRect();
+  const btnX = rect.left + rect.width / 2;
+  const btnY = rect.top + rect.height / 2;
+
+  const dx = btnX - x;
+  const dy = btnY - y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < dangerRadius) {
+    const angle = Math.atan2(dy, dx);
+    offsetX += Math.cos(angle) * 40;
+    offsetY += Math.sin(angle) * 40;
+
+    noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  }
+}
+
+
+  document.addEventListener("mousemove", (e) => {
+    repel(e.clientX, e.clientY);
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    const touch = e.touches[0];
+    if (touch) repel(touch.clientX, touch.clientY);
+  });
+
+</script>
+
+<script>
+  const yesBtn = document.getElementById("yes");
+  const main = document.getElementById("main");
+  const result = document.getElementById("result");
+
+  yesBtn.addEventListener("click", () => {
+    main.style.display = "none";
+    result.style.display = "block";
+
+    // graffiti chaos
+    for (let i = 0; i < 25; i++) {
+      const g = document.createElement("div");
+      g.className = "graffiti";
+      g.innerText = ["🔥", "💘", "😈", "💖", "🎉"][Math.floor(Math.random() * 5)];
+      g.style.left = Math.random() * 100 + "vw";
+      g.style.top = Math.random() * 100 + "vh";
+      document.body.appendChild(g);
+    }
+  });
+</script>
+
+
+</body>
+</html>
