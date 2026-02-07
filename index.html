@@ -44,6 +44,14 @@
       padding: 20px;
     }
 
+    .intro-image {
+      width: 80%;
+      max-width: 260px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
     h1 {
       font-size: 2rem;
       font-weight: 900;
@@ -115,8 +123,8 @@
     }
   </style>
 </head>
-<body>
 
+<body>
   <!-- Floating hearts generator -->
   <script>
     for (let i = 0; i < 30; i++) {
@@ -131,7 +139,13 @@
   </script>
 
   <div class="container" id="main">
-    <h1>Pau, will you be my valentine?</h1>
+    <img
+      src="cover.jpeg"
+      alt="Us 💖"
+      class="intro-image"
+  />
+
+  <h1>Pau, will you be my valentine?</h1>
     <div class="buttons">
       <button id="yes">YES 💘</button>
       <button id="no">NO 😏</button>
@@ -213,6 +227,26 @@
   });
 </script>
 
+<audio id="bg-music" preload="auto" loop>
+  <source src="mi-mayor-anhelo-cover.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+  const music = document.getElementById("bg-music");
+  let musicStarted = false;
+
+  function startMusic() {
+    if (!musicStarted) {
+      music.volume = 0.7;
+      music.play().catch(() => {});
+      musicStarted = true;
+    }
+  }
+
+  // First interaction triggers music (mobile-safe)
+  document.addEventListener("touchstart", startMusic, { once: true });
+  document.addEventListener("click", startMusic, { once: true });
+</script>
 
 </body>
 </html>
