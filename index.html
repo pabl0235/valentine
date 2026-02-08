@@ -266,7 +266,7 @@
   }
 
   // Bind to multiple interaction types to catch the first "wake up" call
-  ["click", "touchstart", "pointerdown"].forEach(evt => {
+  ["click", "touchstart", "pointerdown", "no"].forEach(evt => {
     document.addEventListener(evt, attemptPlay, { once: true });
   });
 </script>
