@@ -168,22 +168,35 @@
   let musicStarted = false;
 
   function startMusic() {
-    if (musicStarted) return;
+    // If it's already playing, don't do anything
+    if (!music.paused) return;
 
-    // Detect if the user is on a computer or mobile
-    // This disables the loop for PC users as requested
+    // 1. Logic for Loop (PC vs Mobile)
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    music.loop = isMobile; 
-    
+    music.loop = isMobile;
     music.volume = 0.7;
-    
+
+    // 2. The Fix: "Prime" the audio 
+    // This tells the browser: "We are definitely doing this now."
     const playPromise = music.play();
+
     if (playPromise !== undefined) {
       playPromise.then(() => {
         musicStarted = true;
-      }).catch(e => console.log("Playback blocked:", e));
+      }).catch(e => {
+        // If it fails (like on a cold start), we try one more time 
+        // immediately on the next frame
+        console.log("Retrying audio...");
+        setTimeout(() => music.play(), 50);
+      });
     }
   }
+
+  // --- Change the listeners to 'mousedown' / 'touchstart' ---
+  // These fire SLIGHTLY faster than 'click' (which waits for the release)
+  ["mousedown", "touchstart"].forEach(evt => {
+    document.addEventListener(evt, startMusic, { once: true });
+  });
 
   // --- 1. Audio Triggers ---
   // Trigger on ANY interaction with the page
