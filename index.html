@@ -195,13 +195,13 @@
   // --- Change the listeners to 'mousedown' / 'touchstart' ---
   // These fire SLIGHTLY faster than 'click' (which waits for the release)
   ["mousedown", "touchstart"].forEach(evt => {
-    document.addEventListener(evt, startMusic, { once: true });
+    document.addEventListener(evt, startMusic, { handleInteraction });
   });
 
   // --- 1. Audio Triggers ---
   // Trigger on ANY interaction with the page
-  document.addEventListener("click", startMusic, { once: true });
-  document.addEventListener("touchstart", startMusic, { once: true });
+  document.addEventListener("click", startMusic, { handleInteraction });
+  document.addEventListener("touchstart", startMusic, { handleInteraction });
 
   // Explicitly trigger when buttons are interacted with (even if the above fails)
   yesBtnMain.addEventListener("click", startMusic);
