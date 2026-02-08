@@ -86,10 +86,10 @@
     #no {
       background-color: #555;
       color: white;
-      position: absolute;
-      top: 70px;
-      pointer-events: none;
-      transition: transform 0.15s ease-out;
+      position: fixed; /* Changed to fixed to move relative to the whole screen */
+      z-index: 1000;   /* Ensure it stays on top */
+      transition: all 0.2s ease;
+      /* REMOVED: pointer-events: none; */
     }
 
     /* Result screen */
@@ -157,61 +157,67 @@
     <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Dancing" />
   </div>
 
-  <script>
+<script>
   const noBtn = document.getElementById("no");
-  const buttons = document.querySelector(".buttons");
+  const yesBtn = document.getElementById("yes");
 
-  const dangerRadius = 80;
-  const escapeStep = 40;
+  function moveButton() {
+    const padding = 20;
+    // Get fresh dimensions every move
+    const noRect = noBtn.getBoundingClientRect();
+    const yesRect = yesBtn.getBoundingClientRect();
 
-  let offsetX = 0;
-  let offsetY = 0;
+    let newX, newY;
+    let isOverlapping = true;
+    let attempts = 0;
 
-  function repel(x, y) {
-    const btnRect = noBtn.getBoundingClientRect();
-    const yesRect = document.getElementById("yes").getBoundingClientRect();
+    while (isOverlapping && attempts < 20) {
+      // Calculate max available space based on current window size
+      const maxX = window.innerWidth - noRect.width - padding;
+      const maxY = window.innerHeight - noRect.height - padding;
 
-    const btnX = btnRect.left + btnRect.width / 2;
-    const btnY = btnRect.top + btnRect.height / 2;
+      newX = Math.max(padding, Math.random() * maxX);
+      newY = Math.max(padding, Math.random() * maxY);
 
-    const dx = btnX - x;
-    const dy = btnY - y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+      // Collision detection with Yes button
+      const buffer = 60;
+      const horizontalOverlap = newX + noRect.width + buffer > yesRect.left && newX - buffer < yesRect.right;
+      const verticalOverlap = newY + noRect.height + buffer > yesRect.top && newY - buffer < yesRect.bottom;
 
-    if (distance < dangerRadius) {
-      const angle = Math.atan2(dy, dx);
-
-      offsetX += Math.cos(angle) * escapeStep;
-      offsetY += Math.sin(angle) * escapeStep;
-
-      // Keep NO inside buttons container
-      const maxX = buttons.clientWidth / 2 - btnRect.width / 2;
-      const maxY = buttons.clientHeight - btnRect.height;
-
-      offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
-      offsetY = Math.max(0, Math.min(maxY, offsetY));
-
-      noBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      if (!(horizontalOverlap && verticalOverlap)) {
+        isOverlapping = false;
+      }
+      attempts++;
     }
+
+    // Apply positions using fixed coordinates
+    noBtn.style.left = `${newX}px`;
+    noBtn.style.top = `${newY}px`;
+    noBtn.style.margin = "0"; // Reset any container margins
+    
+    if (navigator.vibrate) navigator.vibrate(30);
   }
 
-  document.addEventListener("touchmove", (e) => {
-    const touch = e.touches[0];
-    if (touch) repel(touch.clientX, touch.clientY);
+  // Use 'mouseenter' for desktop and 'touchstart' for mobile
+  noBtn.addEventListener("mouseenter", moveButton);
+  noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault(); 
+    moveButton();
   });
-
-  document.addEventListener("mousemove", (e) => {
-    repel(e.clientX, e.clientY);
+  
+  // Also move it if they somehow manage to click it
+  noBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    moveButton();
   });
 </script>
 
-
 <script>
-  const yesBtn = document.getElementById("yes");
+  const yesBtn2 = document.getElementById("yes");
   const main = document.getElementById("main");
   const result = document.getElementById("result");
 
-  yesBtn.addEventListener("click", () => {
+  yesBtn2.addEventListener("click", () => {
     main.style.display = "none";
     result.style.display = "block";
 
@@ -236,15 +242,21 @@
   let musicStarted = false;
 
   function startMusic() {
-    if (!musicStarted) {
-      music.volume = 0.7;
-      music.play().catch(() => {});
-      musicStarted = true;
+    if (musicStarted) return;
+
+    musicStarted = true;
+    music.volume = 0.7;
+
+    const playPromise = music.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        console.log("Audio blocked until user interaction");
+      });
     }
   }
 
-  // First interaction triggers music (mobile-safe)
-  document.addEventListener("touchstart", startMusic, { once: true });
+  // MUST be non-passive on mobile
+  document.addEventListener("touchstart", startMusic, { once: true, passive: false });
   document.addEventListener("click", startMusic, { once: true });
 </script>
 
