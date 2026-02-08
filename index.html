@@ -168,40 +168,37 @@
   let musicStarted = false;
 
   function startMusic() {
-    // If it's already playing, don't do anything
-    if (!music.paused) return;
+    // If music is already playing, we are done. 
+    // Remove listeners so they don't fire anymore.
+    if (!music.paused) {
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+      return;
+    }
 
-    // 1. Logic for Loop (PC vs Mobile)
+    // Set loop based on device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     music.loop = isMobile;
     music.volume = 0.7;
 
-    // 2. The Fix: "Prime" the audio 
-    // This tells the browser: "We are definitely doing this now."
-    const playPromise = music.play();
-
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
+    // The Magic: music.play() returns a Promise
+    music.play()
+      .then(() => {
         musicStarted = true;
-      }).catch(e => {
-        // If it fails (like on a cold start), we try one more time 
-        // immediately on the next frame
-        console.log("Retrying audio...");
-        setTimeout(() => music.play(), 50);
+        console.log("Playback started successfully");
+        // Clean up listeners now that it's working
+        document.removeEventListener("click", handleInteraction);
+        document.removeEventListener("touchstart", handleInteraction);
+      })
+      .catch(error => {
+        console.log("Playback failed, will try on next click:", error);
       });
-    }
   }
-
-  // --- Change the listeners to 'mousedown' / 'touchstart' ---
-  // These fire SLIGHTLY faster than 'click' (which waits for the release)
-  ["mousedown", "touchstart"].forEach(evt => {
-    document.addEventListener(evt, startMusic, { handleInteraction });
-  });
 
   // --- 1. Audio Triggers ---
   // Trigger on ANY interaction with the page
-  document.addEventListener("click", startMusic, { handleInteraction });
-  document.addEventListener("touchstart", startMusic, { handleInteraction });
+  document.addEventListener("click", startMusic);
+  document.addEventListener("touchstart", startMusic);
 
   // Explicitly trigger when buttons are interacted with (even if the above fails)
   yesBtnMain.addEventListener("click", startMusic);
