@@ -157,57 +157,79 @@
     <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Dancing" />
   </div>
 
-<script>
-  const noBtn = document.getElementById("no");
-  const yesBtn = document.getElementById("yes");
+<audio autplay id="bg-music" preload="auto">
+  <source src="mi-mayor-anhelo-cover.mp3" type="audio/mpeg" />
+</audio>
 
+  <script>
+  const music = document.getElementById("bg-music");
+  const yesBtnMain = document.getElementById("yes");
+  const noBtnMain = document.getElementById("no");
+  let musicStarted = false;
+
+  function startMusic() {
+    if (musicStarted) return;
+
+    // Detect if the user is on a computer or mobile
+    // This disables the loop for PC users as requested
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    music.loop = isMobile; 
+    
+    music.volume = 0.7;
+    
+    const playPromise = music.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        musicStarted = true;
+      }).catch(e => console.log("Playback blocked:", e));
+    }
+  }
+
+  // --- 1. Audio Triggers ---
+  // Trigger on ANY interaction with the page
+  document.addEventListener("click", startMusic, { once: true });
+  document.addEventListener("touchstart", startMusic, { once: true });
+
+  // Explicitly trigger when buttons are interacted with (even if the above fails)
+  yesBtnMain.addEventListener("click", startMusic);
+  noBtnMain.addEventListener("mouseenter", startMusic); // PC hover
+  noBtnMain.addEventListener("touchstart", startMusic); // Mobile tap
+
+  // --- 2. The Moving "NO" Button Logic ---
   function moveButton() {
     const padding = 20;
-    // Get fresh dimensions every move
-    const noRect = noBtn.getBoundingClientRect();
-    const yesRect = yesBtn.getBoundingClientRect();
+    const noRect = noBtnMain.getBoundingClientRect();
+    const yesRect = yesBtnMain.getBoundingClientRect();
 
     let newX, newY;
     let isOverlapping = true;
     let attempts = 0;
 
     while (isOverlapping && attempts < 20) {
-      // Calculate max available space based on current window size
       const maxX = window.innerWidth - noRect.width - padding;
       const maxY = window.innerHeight - noRect.height - padding;
 
       newX = Math.max(padding, Math.random() * maxX);
       newY = Math.max(padding, Math.random() * maxY);
 
-      // Collision detection with Yes button
       const buffer = 60;
       const horizontalOverlap = newX + noRect.width + buffer > yesRect.left && newX - buffer < yesRect.right;
       const verticalOverlap = newY + noRect.height + buffer > yesRect.top && newY - buffer < yesRect.bottom;
 
-      if (!(horizontalOverlap && verticalOverlap)) {
-        isOverlapping = false;
-      }
+      if (!(horizontalOverlap && verticalOverlap)) isOverlapping = false;
       attempts++;
     }
 
-    // Apply positions using fixed coordinates
-    noBtn.style.left = `${newX}px`;
-    noBtn.style.top = `${newY}px`;
-    noBtn.style.margin = "0"; // Reset any container margins
+    noBtnMain.style.left = `${newX}px`;
+    noBtnMain.style.top = `${newY}px`;
+    noBtnMain.style.margin = "0"; 
     
     if (navigator.vibrate) navigator.vibrate(30);
   }
 
-  // Use 'mouseenter' for desktop and 'touchstart' for mobile
-  noBtn.addEventListener("mouseenter", moveButton);
-  noBtn.addEventListener("touchstart", (e) => {
+  noBtnMain.addEventListener("mouseenter", moveButton);
+  noBtnMain.addEventListener("touchstart", (e) => {
     e.preventDefault(); 
-    moveButton();
-  });
-  
-  // Also move it if they somehow manage to click it
-  noBtn.addEventListener("click", (e) => {
-    e.preventDefault();
     moveButton();
   });
 </script>
@@ -230,44 +252,6 @@
       g.style.top = Math.random() * 100 + "vh";
       document.body.appendChild(g);
     }
-  });
-</script>
-
-<audio autplay id="bg-music" preload="auto">
-  <source src="mi-mayor-anhelo-cover.mp3" type="audio/mpeg" />
-</audio>
-
-<script>
-  const music = document.getElementById("bg-music");
-  let musicStarted = false;
-
-  function attemptPlay() {
-    if (musicStarted) return;
-
-    // 1. Set the loop logic
-    // If it's a mobile device (touch-based), we can enable loop if you want, 
-    // but per your request, we'll keep it off for PC. 
-    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    music.loop = isMobile; // Only loops on mobile, stays off on PC
-
-    // 2. The "Warm up"
-    music.volume = 0.7;
-    
-    const playPromise = music.play();
-
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        musicStarted = true;
-        console.log("Playing!");
-      }).catch(err => {
-        console.log("Waiting for more direct interaction...");
-      });
-    }
-  }
-
-  // Bind to multiple interaction types to catch the first "wake up" call
-  ["click", "touchstart", "pointerdown", "no"].forEach(evt => {
-    document.addEventListener(evt, attemptPlay, { once: true });
   });
 </script>
 
