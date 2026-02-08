@@ -243,21 +243,27 @@
 
   function startMusic() {
     if (musicStarted) return;
-
-    musicStarted = true;
+    
+    // Force a reload to ensure the source is fresh
+    music.load();
     music.volume = 0.7;
 
     const playPromise = music.play();
+    
     if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        console.log("Audio blocked until user interaction");
+      playPromise.then(() => {
+        console.log("Music started!");
+        musicStarted = true;
+      }).catch((error) => {
+        console.log("Playback failed:", error);
+        // If it fails, we reset musicStarted so the next tap tries again
+        musicStarted = false;
       });
     }
   }
 
-  // MUST be non-passive on mobile
-  document.addEventListener("touchstart", startMusic, { once: true, passive: false });
-  document.addEventListener("click", startMusic, { once: true });
+  // Use 'pointerdown' as it covers both touch and click reliably
+  document.addEventListener("pointerdown", startMusic, { once: true });
 </script>
 
 </body>
