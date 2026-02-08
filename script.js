@@ -13,6 +13,9 @@ for (let i = 0; i < 30; i++) {
 const music = document.getElementById("bg-music");
 
 function startMusic() {
+  if (!music.paused) {
+    return;
+  }
   music.volume = 0.7;
   music.play().catch(() => {});
 }
@@ -28,6 +31,7 @@ const result = document.getElementById("result");
 
 // --- NO button escape ---
 function moveNo() {
+  startMusic();
   const padding = 20;
   const maxX = window.innerWidth - noBtn.offsetWidth - padding;
   const maxY = window.innerHeight - noBtn.offsetHeight - padding;
