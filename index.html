@@ -241,29 +241,34 @@
   const music = document.getElementById("bg-music");
   let musicStarted = false;
 
-  function startMusic() {
+  function attemptPlay() {
     if (musicStarted) return;
-    
-    // Force a reload to ensure the source is fresh
-    music.load();
-    music.volume = 0.7;
 
-    const playPromise = music.play();
+    // 1. Set the loop logic
+    // If it's a mobile device (touch-based), we can enable loop if you want, 
+    // but per your request, we'll keep it off for PC. 
+    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    music.loop = isMobile; // Only loops on mobile, stays off on PC
+
+    // 2. The "Warm up"
+    music.volume = 0.7;
     
+    const playPromise = music.play();
+
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        console.log("Music started!");
         musicStarted = true;
-      }).catch((error) => {
-        console.log("Playback failed:", error);
-        // If it fails, we reset musicStarted so the next tap tries again
-        musicStarted = false;
+        console.log("Playing!");
+      }).catch(err => {
+        console.log("Waiting for more direct interaction...");
       });
     }
   }
 
-  // Use 'pointerdown' as it covers both touch and click reliably
-  document.addEventListener("pointerdown", startMusic, { once: true });
+  // Bind to multiple interaction types to catch the first "wake up" call
+  ["click", "touchstart", "pointerdown"].forEach(evt => {
+    document.addEventListener(evt, attemptPlay, { once: true });
+  });
 </script>
 
 </body>
